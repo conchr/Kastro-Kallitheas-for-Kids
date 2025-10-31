@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Το Κάστρο της Καλλιθέας - Περιπέτεια στην Ιστορία!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+        
+        :root {
+            font-family: 'Comic Neue', cursive;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffcc00, #ff6699, #66ccff);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        .welcome-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .slide {
+            width: 100vw;
+            min-height: 100vh;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        .slide-content {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 8px solid #ffcc00;
+            max-width: 900px;
+            margin: 0 auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slide-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff3366;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 0 #ffcc00;
+        }
+        
+        .slide-text {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        
+        .slide-image {
+            border-radius: 15px;
+            border: 5px solid #66ccff;
+            max-width: 100%;
+            height: auto;
+            margin: 1rem auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-btn {
+            background: #ff3366;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #cc0044;
+            margin: 0 10px;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #cc0044;
+        }
+        
+        .nav-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #cc0044;
+        }
+        
+        .nav-btn:disabled {
+            background: #cccccc;
+            box-shadow: 0 5px 0 #999999;
+            cursor: not-allowed;
+        }
+        
+        .start-btn {
+            background: #ff3366;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 0 #cc0044;
+            margin-top: 2rem;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 13px 0 #cc0044;
+        }
+        
+        .quiz-option {
+            background: #66ccff;
+            color: #003366;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 0;
+            text-align: left;
+            width: 100%;
+            box-shadow: 0 5px 0 #3399cc;
+        }
+        
+        .quiz-option:hover {
+            background: #33bbff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #3399cc;
+        }
+        
+        .quiz-option.correct {
+            background: #66ff66;
+            box-shadow: 0 5px 0 #33cc33;
+        }
+        
+        .quiz-option.incorrect {
+            background: #ff6666;
+            box-shadow: 0 5px 0 #cc3333;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3366, #ffcc00);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        .feedback {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: #ccffcc;
+            color: #006600;
+            border: 3px solid #66ff66;
+        }
+        
+        .feedback.incorrect {
+            background: #ffcccc;
+            color: #660000;
+            border: 3px solid #ff6666;
+        }
+        
+        @media (max-width: 768px) {
+            .slide-title {
+                font-size: 2rem;
+            }
+            
+            .slide-text {
+                font-size: 1.2rem;
+            }
+            
+            .nav-btn, .start-btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Οθόνη έναρξης -->
+    <div class="welcome-screen">
+        <div class="text-center max-w-2xl px-4">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 text-[#ff3366]">Το Κάστρο της Καλλιθέας</h1>
+            <h2 class="text-2xl md:text-3xl font-light mb-8 text-[#3366ff]">Μια Μαγική Περιπέτεια στην Ιστορία!</h2>
+            <p class="text-lg md:text-xl mb-10 text-[#333]">Ανακαλύψτε τα μυστικά ενός αρχαίου κάστρου με διασκεδαστικό τρόπο!</p>
+            <button class="start-btn">Ξεκινήστε την Περιπέτεια!</button>
+        </div>
+    </div>
+
+    <!-- Διαφάνειες Παρουσίασης -->
+    <div id="presentation-container" style="display: none;">
+        <!-- Διαφάνεια 1: Εισαγωγή -->
+        <div class="slide active" data-page-index="1">
+            <div class="slide-content">
+                <h2 class="slide-title">Καλώς ήρθατε στο Κάστρο!</h2>
+                <img src="https://raw.githubusercontent.com/conchr/Kastro-Kallitheas/main/city.jpg" alt="Το Κάστρο της Καλλιθέας" class="slide-image">
+                <p class="slide-text">Αυτό είναι το Κάστρο της Καλλιθέας! Ήταν μια πολύ σημαντική πόλη πριν από χιλιάδες χρόνια. Οι άνθρωποι ζούσαν εδώ και το κάστρο τους προστάτευε.</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 7%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn" disabled>&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 1 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 2: Χρονολόγηση -->
+        <div class="slide" data-page-index="2">
+            <div class="slide-content">
+                <h2 class="slide-title">Πότε χτίστηκε το Κάστρο;</h2>
+                <img src="https://raw.githubusercontent.com/conchr/Kastro-Kallitheas/main/anaskafes.jpg" alt="Ανασκαφές στο κάστρο" class="slide-image">
+                <p class="slide-text">Το κάστρο χτίστηκε πριν από πολύ πολύ καιρό! Στην εποχή που ζούσαν οι αρχαίοι Έλληνες, περίπου 2.500 χρόνια πριν! Φανταστείτε πόσο παλιό είναι!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 14%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 2 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 3: Τα Τείχη -->
+        <div class="slide" data-page-index="3">
+            <div class="slide-content">
+                <h2 class="slide-title">Τα Γιγαντιαία Τείχη</h2>
+                <img src="https://raw.githubusercontent.com/conchr/Kastro-Kallitheas/main/cityWalls.jpg" alt="Τα τείχη του κάστρου" class="slide-image">
+                <p class="slide-text">Το κάστρο είχε πολύ ψηλά και δυνατά τείχη! Αυτά τα τείχη προστάτευαν τους ανθρώπους που ζούσαν μέσα. Ήταν σαν ένα γιγαντιαίο αγκαλιάσμα που τους κρατούσε ασφαλείς!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 21%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 3 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 4: Οι Πύργοι -->
+        <div class="slide" data-page-index="4">
+            <div class="slide-content">
+                <h2 class="slide-title">Οι Ψηλοί Πύργοι</h2>
+                <img src="https://raw.githubusercontent.com/conchr/Kastro-Kallitheas/main/walls.jpg" alt="Οι πύργοι του κάστρου" class="slide-image">
+                <p class="slide-text">Στα τείχη υπήρχαν ψηλοί πύργοι! Από εκεί οι φύλακες μπορούσαν να βλέπουν μακριά και να προειδοποιούν αν έβλεπαν κάποιον εχθρό να έρχεται. Ήταν σαν τα μάτια του κάστρου!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 28%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 4 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 5: Η Ακρόπολη -->
+        <div class="slide" data-page-index="5">
+            <div class="slide-content">
+                <h2 class="slide-title">Η Ακρόπολη - Η Κορυφή του Κάστρου</h2>
+                <p class="slide-text">Στην πιο ψηλή θέση του κάστρου ήταν η ακρόπολη! Ήταν το πιο ασφαλές μέρος. Αν κάποιος επιτεθόταν, όλοι μπορούσαν να τρέξουν εκεί για προστασία. Ήταν σαν το φρούριο μέσα στο φρούριο!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 35%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 5 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 6: Οι Πύλες -->
+        <div class="slide" data-page-index="6">
+            <div class="slide-content">
+                <h2 class="slide-title">Οι Πύλες - Η Είσοδος στο Κάστρο</h2>
+                <img src="https://raw.githubusercontent.com/conchr/Kastro-Kallitheas/main/cutyEnter.jpg" alt="Η είσοδος του κάστρου" class="slide-image">
+                <p class="slide-text">Για να μπεις στο κάστρο, έπρεπε να περάσεις από τις πύλες! Υπήρχαν μερικές πύλες και οι φύλακες τις φύλαγαν προσεκτικά. Μόνο φίλοι μπορούσαν να μπουν, όχι εχθροί!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 42%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 6 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 7: Η Ζωή Μέσα στο Κάστρο -->
+        <div class="slide" data-page-index="7">
+            <div class="slide-content">
+                <h2 class="slide-title">Η Ζωή Μέσα στο Κάστρο</h2>
+                <p class="slide-text">Μέσα στο κάστρο ζούσαν πολλοί άνθρωποι! Είχαν σπίτια, δρόμους και ακόμα και αγορά όπου μπορούσαν να αγοράσουν τρόφιμα και ρούχα. Ήταν μια μικρή πόλη μέσα στα τείχη!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 49%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 7 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 8: Το Κτήριο 10 -->
+        <div class="slide" data-page-index="8">
+            <div class="slide-content">
+                <h2 class="slide-title">Το Σπίτι Νούμερο 10</h2>
+                <img src="https://raw.githubusercontent.com/conchr/Kastro-Kallitheas/main/Ktirio10.jpg" alt="Το κτήριο 10" class="slide-image">
+                <p class="slide-text">Οι αρχαιολόγοι βρήκαν ένα μεγάλο σπίτι που το ονόμασαν "Κτήριο 10". Από αυτό το σπίτι μάθαμε πολλά για τη ζωή των ανθρώπων που ζούσαν στο κάστρο! Ήταν σαν ένα παζλ που μας βοήθησε να καταλάβουμε την ιστορία.</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 56%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 8 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Διαφάνεια 9: Σημασία του Κάστρου -->
+        <div class="slide" data-page-index="9">
+            <div class="slide-content">
+                <h2 class="slide-title">Γιατί είναι Σημαντικό το Κάστρο;</h2>
+                <p class="slide-text">Το Κάστρο της Καλλιθέας είναι σαν ένα βιβλίο ιστορίας που μπορούμε να "διαβάσουμε"! Μας διδάσκει πώς ζούσαν οι άνθρωποι πριν από χιλιάδες χρόνια και πώς προστατεύονταν. Κάθε πέτρα έχει μια ιστορία να μας πει!</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 63%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 9 / 15</span>
+                    <button class="nav-btn">Επόμενο &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Κουίζ: Ερώτηση 1 -->
+        <div class="slide" data-page-index="10">
+            <div class="slide-content">
+                <h2 class="slide-title">Κουίζ Γνώσεων!</h2>
+                <h3 class="text-xl font-bold my-4 text-[#3366ff]">1. Πώς προστατεύονταν οι άνθρωποι στο κάστρο;</h3>
+                
+                <button class="quiz-option" data-correct="false">Με μαγικά ξόρκια</button>
+                <button class="quiz-option" data-correct="true">Με ψηλά τείχη και πύργους</button>
+                <button class="quiz-option" data-correct="false">Κρυβόντουσαν κάτω από τα κρεβάτια</button>
+                
+                <div class="feedback correct hidden">Μπράβο! Απάντησες σωστά!</div>
+                <div class="feedback incorrect hidden">Λάθος! Η σωστή απάντηση είναι: Με ψηλά τείχη και πύργους</div>
+                
+                <div class="progress-bar"><div class="progress-fill" style="width: 70%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 10 / 15</span>
+                    <button class="nav-btn next-question hidden">Επόμενη Ερώτηση &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Κουίζ: Ερώτηση 2 -->
+        <div class="slide" data-page-index="11">
+            <div class="slide-content">
+                <h2 class="slide-title">Κουίζ Γνώσεων!</h2>
+                <h3 class="text-xl font-bold my-4 text-[#3366ff]">2. Τι ήταν η ακρόπολη;</h3>
+                
+                <button class="quiz-option" data-correct="false">Ένα μεγάλο πάρκο με χλόη</button>
+                <button class="quiz-option" data-correct="false">Μια πισίνα για κολύμπι</button>
+                <button class="quiz-option" data-correct="true">Το πιο ασφαλές μέρος στο ψηλότερο σημείο</button>
+                
+                <div class="feedback correct hidden">Μπράβο! Απάντησες σωστά!</div>
+                <div class="feedback incorrect hidden">Λάθος! Η σωστή απάντηση είναι: Το πιο ασφαλές μέρος στο ψηλότερο σημείο</div>
+                
+                <div class="progress-bar"><div class="progress-fill" style="width: 77%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 11 / 15</span>
+                    <button class="nav-btn next-question hidden">Επόμενη Ερώτηση &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Κουίζ: Ερώτηση 3 -->
+        <div class="slide" data-page-index="12">
+            <div class="slide-content">
+                <h2 class="slide-title">Κουίζ Γνώσεων!</h2>
+                <h3 class="text-xl font-bold my-4 text-[#3366ff]">3. Τι έκαναν οι φύλακες στους πύργους;</h3>
+                
+                <button class="quiz-option" data-correct="false">Έπαιζαν παιχνίδια στο κινητό</button>
+                <button class="quiz-option" data-correct="true">Παρακολουθούσαν αν έρχονταν εχθροί</button>
+                <button class="quiz-option" data-correct="false">Κοιμόντουσαν όλη μέρα</button>
+                
+                <div class="feedback correct hidden">Μπράβο! Απάντησες σωστά!</div>
+                <div class="feedback incorrect hidden">Λάθος! Η σωστή απάντηση είναι: Παρακολουθούσαν αν έρχονταν εχθροί</div>
+                
+                <div class="progress-bar"><div class="progress-fill" style="width: 84%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 12 / 15</span>
+                    <button class="nav-btn next-question hidden">Επόμενη Ερώτηση &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Κουίζ: Ερώτηση 4 -->
+        <div class="slide" data-page-index="13">
+            <div class="slide-content">
+                <h2 class="slide-title">Κουίζ Γνώσεων!</h2>
+                <h3 class="text-xl font-bold my-4 text-[#3366ff]">4. Πώς μπαίνανε οι άνθρωποι στο κάστρο;</h3>
+                
+                <button class="quiz-option" data-correct="false">Πηδώντας από το τείχος</button>
+                <button class="quiz-option" data-correct="true">Από τις ειδικές πύλες</button>
+                <button class="quiz-option" data-correct="false">Με ελικόπτερο</button>
+                
+                <div class="feedback correct hidden">Μπράβο! Απάντησες σωστά!</div>
+                <div class="feedback incorrect hidden">Λάθος! Η σωστή απάντηση είναι: Από τις ειδικές πύλες</div>
+                
+                <div class="progress-bar"><div class="progress-fill" style="width: 91%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 13 / 15</span>
+                    <button class="nav-btn next-question hidden">Επόμενη Ερώτηση &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Κουίζ: Ερώτηση 5 -->
+        <div class="slide" data-page-index="14">
+            <div class="slide-content">
+                <h2 class="slide-title">Κουίζ Γνώσεων!</h2>
+                <h3 class="text-xl font-bold my-4 text-[#3366ff]">5. Τι μάθαμε από το "Κτήριο 10";</h3>
+                
+                <button class="quiz-option" data-correct="false">Πώς να φτιάχνουμε πίτσα</button>
+                <button class="quiz-option" data-correct="false">Ποιος θα νικήσει στο Πόκεμον</button>
+                <button class="quiz-option" data-correct="true">Πώς ζούσαν οι άνθρωποι στο κάστρο</button>
+                
+                <div class="feedback correct hidden">Μπράβο! Απάντησες σωστά!</div>
+                <div class="feedback incorrect hidden">Λάθος! Η σωστή απάντηση είναι: Πώς ζούσαν οι άνθρωποι στο κάστρο</div>
+                
+                <div class="progress-bar"><div class="progress-fill" style="width: 98%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 14 / 15</span>
+                    <button class="nav-btn next-question hidden">Δείτε τα Αποτελέσματα &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Τελική Σελίδα Αποτελεσμάτων -->
+        <div class="slide" data-page-index="15">
+            <div class="slide-content">
+                <h2 class="slide-title">Συγχαρητήρια!</h2>
+                <p class="slide-text text-center">Ολοκληρώσατε το κουίζ και μάθατε πολλά για το Κάστρο της Καλλιθέας!</p>
+                
+                <div class="text-center my-8">
+                    <h3 class="text-2xl font-bold text-[#ff3366]">Το Σκορ Σας:</h3>
+                    <p class="text-4xl font-bold my-4" id="final-score">0/5</p>
+                    <p id="score-message" class="text-xl"></p>
+                </div>
+                
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+                <div class="flex justify-between mt-auto">
+                    <button class="nav-btn">&larr; Πίσω</button>
+                    <span class="font-bold text-lg text-[#ff3366]">Σελίδα 15 / 15</span>
+                    <a href="https://conchr.github.io/Farsala-Center-Page/" class="nav-btn">Κεντρική Σελίδα</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const welcomeScreen = document.querySelector('.welcome-screen');
+            const presentationContainer = document.getElementById('presentation-container');
+            const startBtn = document.querySelector('.start-btn');
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentPage = 1;
+            let quizScore = 0;
+            
+            // Start presentation
+            startBtn.addEventListener('click', () => {
+                welcomeScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    welcomeScreen.style.display = 'none';
+                    presentationContainer.style.display = 'block';
+                    showSlide(1);
+                }, 800);
+            });
+            
+            // Show specific slide
+            const showSlide = (index) => {
+                if (index < 1 || index > totalSlides) return;
+                
+                currentPage = index;
+                
+                slides.forEach(slide => {
+                    slide.classList.remove('active');
+                });
+                
+                const currentSlide = document.querySelector(`.slide[data-page-index="${currentPage}"]`);
+                if (currentSlide) {
+                    currentSlide.classList.add('active');
+                    setTimeout(() => {
+                        currentSlide.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                }
+                
+                // Ενημέρωση τελικού σκορ αν είμαστε στη σελίδα αποτελεσμάτων
+                if (currentPage === 15) {
+                    updateFinalScore();
+                }
+                
+                updateNavigation();
+            };
+            
+            // Next slide
+            const nextSlide = () => {
+                showSlide(currentPage + 1);
+            };
+            
+            // Previous slide
+            const prevSlide = () => {
+                showSlide(currentPage - 1);
+            };
+            
+            // Update navigation buttons
+            const updateNavigation = () => {
+                // Enable/disable previous buttons
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    if (btn.textContent.includes('Πίσω')) {
+                        btn.disabled = currentPage === 1;
+                    }
+                });
+            };
+            
+            // Add event listeners to navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.textContent.includes('Επόμενο') && !btn.classList.contains('next-question')) {
+                    btn.addEventListener('click', nextSlide);
+                } else if (btn.textContent.includes('Πίσω') && !btn.disabled) {
+                    btn.addEventListener('click', prevSlide);
+                }
+            });
+            
+            // Quiz functionality
+            const quizOptions = document.querySelectorAll('.quiz-option');
+            const nextQuestionButtons = document.querySelectorAll('.next-question');
+            
+            // Add event listeners to quiz options
+            quizOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Απενεργοποίηση όλων των επιλογών σε αυτή τη σελίδα
+                    const allOptions = this.parentElement.querySelectorAll('.quiz-option');
+                    allOptions.forEach(opt => {
+                        opt.disabled = true;
+                        opt.style.cursor = 'not-allowed';
+                    });
+                    
+                    // Εμφάνιση ανατροφοδότησης
+                    const isCorrect = this.dataset.correct === 'true';
+                    const feedbackCorrect = this.parentElement.querySelector('.feedback.correct');
+                    const feedbackIncorrect = this.parentElement.querySelector('.feedback.incorrect');
+                    
+                    if (isCorrect) {
+                        feedbackCorrect.style.display = 'block';
+                        quizScore++;
+                    } else {
+                        feedbackIncorrect.style.display = 'block';
+                        
+                        // Επισήμανση της σωστής απάντησης
+                        const correctOption = this.parentElement.querySelector('.quiz-option[data-correct="true"]');
+                        correctOption.classList.add('correct');
+                    }
+                    
+                    // Επισήμανση της επιλεγμένης απάντησης
+                    this.classList.add(isCorrect ? 'correct' : 'incorrect');
+                    
+                    // Εμφάνιση κουμπιού για επόμενη ερώτηση
+                    const nextBtn = this.parentElement.querySelector('.next-question');
+                    if (nextBtn) {
+                        nextBtn.classList.remove('hidden');
+                        nextBtn.addEventListener('click', nextSlide);
+                    }
+                });
+            });
+            
+            // Update final score
+            const updateFinalScore = () => {
+                const finalScoreElement = document.getElementById('final-score');
+                const scoreMessageElement = document.getElementById('score-message');
+                
+                finalScoreElement.textContent = `${quizScore}/5`;
+                
+                if (quizScore === 5) {
+                    scoreMessageElement.textContent = "Τέλειο! Είσαι ειδικός στο Κάστρο της Καλλιθέας!";
+                    scoreMessageElement.className = "text-xl font-bold text-green-600";
+                } else if (quizScore >= 3) {
+                    scoreMessageElement.textContent = "Πολύ καλά! Ξέρεις πολλά για το κάστρο!";
+                    scoreMessageElement.className = "text-xl font-bold text-blue-600";
+                } else {
+                    scoreMessageElement.textContent = "Καλή προσπάθεια! Διάβασε ξανά την παρουσίαση για να μάθεις περισσότερα!";
+                    scoreMessageElement.className = "text-xl font-bold text-orange-600";
+                }
+            };
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === 'Escape') {
+                    welcomeScreen.style.display = 'flex';
+                    welcomeScreen.classList.remove('fade-out');
+                    presentationContainer.style.display = 'none';
+                }
+            });
+            
+            // Initialize
+            updateNavigation();
+        });
+    </script>
+</body>
+</html>
